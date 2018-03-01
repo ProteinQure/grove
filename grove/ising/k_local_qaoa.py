@@ -36,10 +36,8 @@ def energy_value(h, generalized_J, sol):
         energy += h[i] * int(sol[i])
     return energy
 
-
 def print_fun(x):
     print(x)
-
 
 def ising_trans(x):
     # Transformation to Ising notation
@@ -48,15 +46,14 @@ def ising_trans(x):
     else:
         return 1
 
-
 def klocal_ising(h, generalized_J, num_steps=0, verbose=True, rand_seed=None, connection=None, samples=None,
           initial_beta=None, initial_gamma=None, minimizer_kwargs=None,
           vqe_option=None):
     """
-    Ising set up method
+    k-local generalized Ising set up method
 
-    :param h: External magnectic term of the Ising problem. List.
-    :param J: Interaction term of the Ising problem. Dictionary.
+    :param h: Biases of the individual qubits [List]
+    :param generalized_J: Coupling coefficients of the k-local Hamiltonian [Dictionary]
     :param num_steps: (Optional.Default=2 * len(h)) Trotterization order for the
                   QAOA algorithm.
     :param verbose: (Optional.Default=True) Verbosity of the code.
@@ -79,19 +76,30 @@ def klocal_ising(h, generalized_J, num_steps=0, verbose=True, rand_seed=None, co
                              arguments.  If None set to
                        vqe_option = {'disp': print_fun, 'return_all': True,
                        'samples': samples}
-    :return: Most frequent Ising string, Energy of the Ising string, Circuit used to obtain result.
+    :return: most frequent solution string, energy of the solution string, circuit used to obtain result.
     :rtype: List, Integer or float, 'pyquil.quil.Program'.
 
     """
+    
+    # default number of steps
     if num_steps == 0:
         num_steps = 2 * len(h)
-
+    
+    # number of qubits
     n_nodes = len(h)
 
     cost_operators = []
     driver_operators = []
-    for i, j in J.keys():
-        cost_operators.append(PauliSum([PauliTerm("Z", i, J[(i, j)]) * PauliTerm("Z", j)]))
+    #for i, j in generalized_J.keys():
+    #    cost_operators.append(PauliSum([PauliTerm("Z", i, generalized_J[(i, j)]) * PauliTerm("Z", j)]))
+    for key in generalized_J.keys():
+        # first PauliTerm is multiplied with coefficient obtained from generalized_J
+        pauli_product = PauliTerm("Z", key[0], generalized_J[key])
+        # depending on the locality we multiply with additional Z PauliTerms
+        for i in range(1,len(key)):
+            pauli_product = pauli_product * PauliTerm("Z", key[i])
+        # finally we cast the pauli_product into a PauliSum object and append it to the cost_operators
+        cost_operators.append(PauliSum(pauli_product))
 
     for i in range(n_nodes):
         cost_operators.append(PauliSum([PauliTerm("Z", i, h[i])]))
@@ -106,6 +114,7 @@ def klocal_ising(h, generalized_J, num_steps=0, verbose=True, rand_seed=None, co
         minimizer_kwargs = {'method': 'Nelder-Mead',
                             'options': {'ftol': 1.0e-2, 'xtol': 1.0e-2,
                                         'disp': False}}
+
     if vqe_option is None:
         vqe_option = {'disp': print_fun, 'return_all': True,
                       'samples': samples}
@@ -123,10 +132,11 @@ def klocal_ising(h, generalized_J, num_steps=0, verbose=True, rand_seed=None, co
                      vqe_options=vqe_option)
 
     betas, gammas = qaoa_inst.get_angles()
-    most_freq_string, sampling_results = qaoa_inst.get_string(
-        betas, gammas)
+    most_freq_string, sampling_results = qaoa_inst.get_string(betas, gammas)
+
     most_freq_string_ising = [ising_trans(it) for it in most_freq_string]
-    energy_ising = energy_value(h, J, most_freq_string_ising)
+    energy_ising = energy_value(h, generalized_J, most_freq_string_ising)
+
     param_prog = qaoa_inst.get_parameterized_program()
     circuit = param_prog(np.hstack((betas, gammas)))
 
