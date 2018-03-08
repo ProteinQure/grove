@@ -30,7 +30,7 @@ def energy_value(h, generalized_J, sol):
             multipliers = int(sol[elm[0]]) * int(sol[elm[1]])
             # if locality > 2 then add more multipliers
             for i in range(2,len(elm)):
-                multpliers = multipliers*sol(elm[i])
+                multpliers = multipliers*sol[elm[i]]
             energy += generalized_J[elm] * multipliers
     for i in range(len(h)):
         energy += h[i] * int(sol[i])
