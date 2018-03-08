@@ -12,7 +12,7 @@ conn = api.QVMConnection()
 
 def energy_value(h, generalized_J, sol):
     """
-    Obtain energy of an Ising solution for a given Ising problem (h,J).
+    Obtain energy of an Ising solution for a given generalized Ising problem (h,J).
 
     :param h: Biases of the individual qubits [List]
     :param generalized_J: Coupling coefficients of the k-local Hamiltonian [Dictionary]
@@ -99,7 +99,7 @@ def klocal_ising(h, generalized_J, num_steps=0, verbose=True, rand_seed=None, co
         for i in range(1,len(key)):
             pauli_product = pauli_product * PauliTerm("Z", key[i])
         # finally we cast the pauli_product into a PauliSum object and append it to the cost_operators
-        cost_operators.append(PauliSum(pauli_product))
+        cost_operators.append(PauliSum([pauli_product]))
 
     for i in range(n_nodes):
         cost_operators.append(PauliSum([PauliTerm("Z", i, h[i])]))

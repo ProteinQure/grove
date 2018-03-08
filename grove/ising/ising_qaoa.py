@@ -95,6 +95,8 @@ def ising(h, J, num_steps=0, verbose=True, rand_seed=None, connection=None, samp
     for i in range(n_nodes):
         driver_operators.append(PauliSum([PauliTerm("X", i, -1.0)]))
 
+    #return cost_operators, driver_operators
+
     if connection is None:
         connection = CXN
 
