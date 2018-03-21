@@ -6,6 +6,7 @@ from grove.pyqaoa.qaoa import QAOA
 from pyquil.paulis import PauliSum, PauliTerm
 from scipy.optimize import minimize
 import numpy as np
+from mixer_hamiltonian import constrainedQAOA
 
 conn = api.QVMConnection()
 
@@ -47,7 +48,7 @@ def ising_trans(x):
         return 1
 
 def klocal_ising(h, generalized_J, num_steps=0, verbose=True, rand_seed=None, connection=None, samples=None,
-          initial_beta=None, initial_gamma=None, minimizer_kwargs=None,
+          state_initialization=None, initial_beta=None, initial_gamma=None, minimizer_kwargs=None,
           vqe_option=None):
     """
     k-local generalized Ising set up method
@@ -87,57 +88,26 @@ def klocal_ising(h, generalized_J, num_steps=0, verbose=True, rand_seed=None, co
     
     # number of qubits
     n_nodes = len(h)
-    #qubit_list = [0,1,2,5,6,7,8]
-    qubit_list = []
 
     cost_operators = []
     driver_operators = []
     for key in generalized_J.keys():
 
         # first PauliTerm is multiplied with coefficient obtained from generalized_J
-        if key[0] >= 3:
-            print 'current key: ', key[0]
-            qubit_index = key[0]+1 # increase qubit index by 1 to avoid dead qubit 3 on the QPU
-            print 'new key: ', qubit_index
-        else:
-            qubit_index = key[0]
-
-        if not qubit_index in qubit_list:
-            qubit_list.append(qubit_index)
-
-        pauli_product = PauliTerm("Z", qubit_index, generalized_J[key])
+        pauli_product = PauliTerm("Z", key[0], generalized_J[key])
 
         # depending on the locality we multiply with additional Z PauliTerms
         for i in range(1,len(key)):
-            if key[i] >= 3:
-                print 'current key: ', key[i]
-                qubit_index = key[i]+1 # increase qubit index by 1 to avoid dead qubit 3 on the QPU
-                print 'new key: ', qubit_index
-            else:
-                qubit_index = key[i]
-            if not qubit_index in qubit_list:
-                qubit_list.append(qubit_index)
-            pauli_product = pauli_product * PauliTerm("Z", qubit_index)
+            pauli_product = pauli_product * PauliTerm("Z", key[i])
+
         # finally we cast the pauli_product into a PauliSum object and append it to the cost_operators
         cost_operators.append(PauliSum([pauli_product]))
 
-    # sort the list of qubit indices
-    qubit_list.sort()
-    print 'generated qubit_list: ', qubit_list
-
-    #for i in range(n_nodes):
-    for i in qubit_list:
-        if i >= 3:
-            i -= 1
-        print 'i in cost_operators:', i
+    for i in range(n_nodes):
         cost_operators.append(PauliSum([PauliTerm("Z", i, h[i])]))
 
-    #for i in range(n_nodes):
-    for i in qubit_list:
-        if i >= 3:
-            i -= 1
-        print 'i in driver_operators:', i
-        driver_operators.append(PauliSum([PauliTerm("X", i, -1.0)]))
+    # get the mixer mixer hamiltonian with the feasible subspace as its ground subspace
+    driver_operators = constrainedQAOA.generate_mixer(n_nodes)
 
     if connection is None:
         connection = con
@@ -154,7 +124,9 @@ def klocal_ising(h, generalized_J, num_steps=0, verbose=True, rand_seed=None, co
     if not verbose:
         vqe_option['disp'] = None
 
-    qaoa_inst = QAOA(connection, n_nodes, qubit_list, steps=num_steps, cost_ham=cost_operators,
+    #print('everything is initialized')
+    if state_initialization == None:
+        qaoa_inst = QAOA(connection, n_nodes, steps=num_steps, cost_ham=cost_operators,
                      ref_hamiltonian=driver_operators,
                      store_basis=True,
                      rand_seed=rand_seed,
@@ -163,14 +135,27 @@ def klocal_ising(h, generalized_J, num_steps=0, verbose=True, rand_seed=None, co
                      minimizer=minimize,
                      minimizer_kwargs=minimizer_kwargs,
                      vqe_options=vqe_option)
+    else: 
+        qaoa_inst = QAOA(connection, n_nodes, steps=num_steps, cost_ham=cost_operators,
+                     ref_hamiltonian=driver_operators,
+                     driver_ref=state_initialization,
+                     store_basis=True,
+                     rand_seed=rand_seed,
+                     init_betas=initial_beta,
+                     init_gammas=initial_gamma,
+                     minimizer=minimize,
+                     minimizer_kwargs=minimizer_kwargs,
+                     vqe_options=vqe_option)
 
+    #print('QAOA instantiated')
     betas, gammas = qaoa_inst.get_angles()
     most_freq_string, sampling_results = qaoa_inst.get_string(betas, gammas)
 
+    #print('Sampled')
     most_freq_string_ising = [ising_trans(it) for it in most_freq_string]
-    #energy_ising = energy_value(h, generalized_J, most_freq_string_ising)
-    energy_ising = 0
+    energy_ising = energy_value(h, generalized_J, most_freq_string_ising)
 
+    #print('Calculating energy.')
     param_prog = qaoa_inst.get_parameterized_program()
     circuit = param_prog(np.hstack((betas, gammas)))
 

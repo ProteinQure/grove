@@ -25,7 +25,7 @@ from functools import reduce
 
 
 class QAOA(object):
-    def __init__(self, qvm, n_qubits, steps=1, init_betas=None,
+    def __init__(self, qvm, n_qubits, qubit_list=None, steps=1, init_betas=None,
                  init_gammas=None, cost_ham=[],
                  ref_hamiltonian=[], driver_ref=None,
                  minimizer=None, minimizer_args=[],
@@ -69,6 +69,8 @@ class QAOA(object):
         self.qvm = qvm
         self.steps = steps
         self.n_qubits = n_qubits
+        if qubit_list == None:
+            qubit_list = list(range(n_qubits))
         self.nstates = 2 ** n_qubits
         if store_basis:
             self.states = [np.binary_repr(i, width=self.n_qubits) for i in range(
@@ -85,8 +87,10 @@ class QAOA(object):
                 self.ref_state_prep = driver_ref
         else:
             ref_prog = pq.Program()
-            for i in range(self.n_qubits):
+            for i in qubit_list:
+            #for i in range(self.n_qubits):
                 ref_prog.inst(H(i))
+            print 'reference program: ', ref_prog
             self.ref_state_prep = ref_prog
 
         if not isinstance(cost_ham, (list, tuple)):
