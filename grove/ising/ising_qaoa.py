@@ -45,23 +45,29 @@ def ising_trans(x):
         return 1
 
 
-def ising(h, J, num_steps=0, verbose=True, rand_seed=None, connection=None, samples=None,
-          initial_beta=None, initial_gamma=None, minimizer_kwargs=None,
-          vqe_option=None):
+def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True,
+          rand_seed=None, connection=None, samples=None, initial_beta=None,
+          initial_gamma=None, minimizer_kwargs=None, vqe_option=None):
     """
-    Ising set up method
+    Ising set up method for QAOA. Supports 2-local as well as k-local interaction terms.
 
     :param h: External magnectic term of the Ising problem. List.
-    :param J: Interaction term of the Ising problem. Dictionary.
+    :param J: Interaction terms of the Ising problem (may be k-local!). Dictionary.
     :param num_steps: (Optional.Default=2 * len(h)) Trotterization order for the
                   QAOA algorithm.
+    :param embedding: (Optional. Default: None) Mapping of logical to physical qubits
+           in the QPU hardware graph. Logical qubits must be the dict keys. Dictionary.
+    :param driver_operators: (Optional. Default: X on all qubits.) The mixer
+                Hamiltonian used in QAOA. Can be used to enforce hard constraints
+                and ensure that solution stays in feasible subspace.
+                Must be PauliSum objects.
     :param verbose: (Optional.Default=True) Verbosity of the code.
     :param rand_seed: (Optional. Default=None) random seed when beta and
                       gamma angles are not provided.
     :param connection: (Optional) connection to the QVM. Default is None.
     :param samples: (Optional. Default=None) VQE option. Number of samples
                     (circuit preparation and measurement) to use in operator
-                    averaging.
+                    averaging. Required when using QPU backend.
     :param initial_beta: (Optional. Default=None) Initial guess for beta
                          parameters.
     :param initial_gamma: (Optional. Default=None) Initial guess for gamma
@@ -84,10 +90,22 @@ def ising(h, J, num_steps=0, verbose=True, rand_seed=None, connection=None, samp
 
     n_nodes = len(h)
 
+    if embedding is not None:
+        # construct inverse embedding
+        inv_embedding = { embedding[k]:k for k in embedding.keys() }
+
     cost_operators = []
     driver_operators = []
-    for i, j in J.keys():
-        cost_operators.append(PauliSum([PauliTerm("Z", i, J[(i, j)]) * PauliTerm("Z", j)]))
+    for key in J.keys():
+        # first PauliTerm is multiplied with coefficient obtained from J
+        pauli_product = PauliTerm("Z", embedding[key[0]], J[key])
+
+        for i in range(1,len(key)):
+            # multiply with additional Z PauliTerms depending
+            # on the locality of the interaction terms
+            pauli_product *= PauliTerm("Z", embedding[key[i]])
+
+        cost_operators.append(PauliSum([pauli_product]))
 
     for i in range(n_nodes):
         cost_operators.append(PauliSum([PauliTerm("Z", i, h[i])]))
@@ -114,6 +132,7 @@ def ising(h, J, num_steps=0, verbose=True, rand_seed=None, connection=None, samp
                      rand_seed=rand_seed,
                      init_betas=initial_beta,
                      init_gammas=initial_gamma,
+                     embedding=embedding,
                      minimizer=minimize,
                      minimizer_kwargs=minimizer_kwargs,
                      vqe_options=vqe_option)
