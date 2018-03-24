@@ -107,8 +107,8 @@ def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True
 
         cost_operators.append(PauliSum([pauli_product]))
 
-    for i in range(n_nodes):
-        cost_operators.append(PauliSum([PauliTerm("Z", i, h[i])]))
+    for i in h.keys():
+        cost_operators.append(PauliSum([PauliTerm("Z", embedding[i], h[i])]))
 
     for i in range(n_nodes):
         driver_operators.append(PauliSum([PauliTerm("X", i, -1.0)]))
