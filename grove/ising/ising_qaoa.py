@@ -110,8 +110,10 @@ def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True
     for i in h.keys():
         cost_operators.append(PauliSum([PauliTerm("Z", embedding[i], h[i])]))
 
-    for i in range(n_nodes):
-        driver_operators.append(PauliSum([PauliTerm("X", i, -1.0)]))
+    if driver_operators is None:
+        # default to X mixer
+        for i in embedding.values():
+            driver_operators.append(PauliSum([PauliTerm("X", i, -1.0)]))
 
     if connection is None:
         connection = CXN
@@ -120,6 +122,7 @@ def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True
         minimizer_kwargs = {'method': 'Nelder-Mead',
                             'options': {'ftol': 1.0e-2, 'xtol': 1.0e-2,
                                         'disp': False}}
+
     if vqe_option is None:
         vqe_option = {'disp': print_fun, 'return_all': True,
                       'samples': samples}
