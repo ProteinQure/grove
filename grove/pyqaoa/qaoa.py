@@ -26,7 +26,7 @@ from functools import reduce
 
 class QAOA(object):
     def __init__(self, qvm, n_qubits, steps=1, init_betas=None,
-                 init_gammas=None, cost_ham=[],
+                 init_gammas=None, embedding=None, cost_ham=[],
                  ref_hamiltonian=[], driver_ref=None,
                  minimizer=None, minimizer_args=[],
                  minimizer_kwargs={}, rand_seed=None,
@@ -45,6 +45,8 @@ class QAOA(object):
                            mixing terms. Default=None.
         :param init_gammas: (list) Initial values for the gamma parameters on the
                             cost function. Default=None.
+        :param embedding: (dict) Dictionary mapping logical qubits to physical
+                    qubits on the Rigetti QPU. Logical qubits must be the dict keys.
         :param cost_ham: list of clauses in the cost function. Must be
                     PauliSum objects
         :param ref_hamiltonian: list of clauses in the cost function. Must be
@@ -76,16 +78,21 @@ class QAOA(object):
         self.betas = init_betas
         self.gammas = init_gammas
         self.vqe_options = vqe_options
+        if embedding is not None:
+            self.embedding = embedding
+        else:
+            # create identity dictionary
+            self.embedding = { i: i for i in range(n_qubits) }
 
         if driver_ref is not None:
             if not isinstance(driver_ref, pq.Program):
-                raise TypeError("""Please provide a pyQuil Program object as a
+                raise TypeError("""Please provide a pyQuil Program object
                                    to generate initial state""")
             else:
                 self.ref_state_prep = driver_ref
         else:
             ref_prog = pq.Program()
-            for i in range(self.n_qubits):
+            for i in self.embedding.values():
                 ref_prog.inst(H(i))
             self.ref_state_prep = ref_prog
 
