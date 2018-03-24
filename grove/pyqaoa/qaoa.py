@@ -197,7 +197,7 @@ class QAOA(object):
         stacked_params = np.hstack((self.betas, self.gammas))
         vqe = VQE(self.minimizer, minimizer_args=self.minimizer_args,
                   minimizer_kwargs=self.minimizer_kwargs)
-        cost_ham = reduce(lambda x, y: x + y, self.cost_ham)
+        cost_ham = sum(self.cost_ham)
         # maximizing the cost function!
         param_prog = self.get_parameterized_program()
         result = vqe.vqe_run(param_prog, cost_ham, stacked_params, qvm=self.qvm,
@@ -249,11 +249,12 @@ class QAOA(object):
         param_prog = self.get_parameterized_program()
         stacked_params = np.hstack((betas, gammas))
         sampling_prog = param_prog(stacked_params)
-        for i in range(self.n_qubits):
+        for i in self.embedding.values():
             sampling_prog.measure(i, [i])
 
+        classical_register = list(sorted(self.embedding.values()))
         bitstring_samples = self.qvm.run_and_measure(sampling_prog,
-                                                     list(range(self.n_qubits)),
+                                                     classical_register,
                                                      trials=samples)
         bitstring_tuples = list(map(tuple, bitstring_samples))
         freq = Counter(bitstring_tuples)
