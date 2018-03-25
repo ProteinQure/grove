@@ -33,7 +33,7 @@ def energy_value(h, J, sol):
             for i in range(2, len(elm)):
                 multipliers = multipliers * sol[elm[i]]
             ener_ising += J[elm] * multipliers
-    for i in range(len(h)):
+    for i in h.keys():
         ener_ising += h[i] * int(sol[i])
     return ener_ising
 
