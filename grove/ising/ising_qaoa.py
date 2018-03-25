@@ -37,6 +37,22 @@ def print_fun(x):
     print(x)
 
 
+def unembed_solution(embedded_solution, inv_embedding):
+    """
+    In case an embedding of logical to physical qubits was used.
+
+    Unembedding the solution string since QAOA returns solution string
+    that is sorted based on indices of physical qubits which might not
+    match up with qubit ordering in logical space.
+
+    :param embedded_solution: Solution string returned from QAOA.
+    :param inv_embedding: Dictionary that has physical qubits as keys
+                and logical qubits as values.
+    """
+    pos_list = [x[1] for x in sorted(inv_embedding.items(),key=lambda x: x[0])]
+    return [embedded_solution[i] for i,_ in sorted(enumerate(pos_list),key=lambda x: x[1])]
+
+
 def ising_trans(x):
     # Transformation to Ising notation
     if x == 1:
@@ -119,8 +135,12 @@ def ising(h, J, num_steps=0, verbose=True, rand_seed=None, connection=None, samp
                      vqe_options=vqe_option)
 
     betas, gammas = qaoa_inst.get_angles()
-    most_freq_string, sampling_results = qaoa_inst.get_string(
-        betas, gammas)
+    most_freq_string, sampling_results = qaoa_inst.get_string(betas, gammas)
+
+    if embedding is not None:
+        # in case we use an embedding we need to reorder the solution
+        most_freq_string = unembed_solution(most_freq_string, inv_embedding)
+
     most_freq_string_ising = [ising_trans(it) for it in most_freq_string]
     energy_ising = energy_value(h, J, most_freq_string_ising)
     param_prog = qaoa_inst.get_parameterized_program()
