@@ -93,7 +93,8 @@ def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True
     if num_steps == 0:
         num_steps = 2 * len(h)
 
-    n_nodes = len(h)
+    n_nodes = len(set([ index for tuple_ in list(J.keys()) for index in tuple_]
+                        + list(h.keys())))
 
     if embedding is not None:
         # construct inverse embedding
@@ -102,6 +103,7 @@ def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True
     cost_operators = []
     driver_operators = []
     for key in J.keys():
+        print(key)
         # first PauliTerm is multiplied with coefficient obtained from J
         pauli_product = PauliTerm("Z", embedding[key[0]], J[key])
 
