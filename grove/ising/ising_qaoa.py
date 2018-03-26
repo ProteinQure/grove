@@ -71,6 +71,9 @@ def ising(h, J, num_steps=0, verbose=True, rand_seed=None, connection=None, samp
     :param J: Interaction term of the Ising problem. Dictionary.
     :param num_steps: (Optional.Default=2 * len(h)) Trotterization order for the
                   QAOA algorithm.
+    :param embedding: (Optional. Default: Identity dict) Mapping of logical to physical
+                qubits in the QPU hardware graph. Logical qubits must be the
+                dict keys. Dictionary.
     :param verbose: (Optional.Default=True) Verbosity of the code.
     :param rand_seed: (Optional. Default=None) random seed when beta and
                       gamma angles are not provided.
@@ -99,6 +102,13 @@ def ising(h, J, num_steps=0, verbose=True, rand_seed=None, connection=None, samp
         num_steps = 2 * len(h)
 
     n_nodes = len(h)
+
+    if embedding is None:
+        embedding = { i:i for i in range(n_nodes) }
+        inv_embedding = None
+    else:
+        # construct inverse embedding
+        inv_embedding = { embedding[k]:k for k in embedding.keys() }
 
     cost_operators = []
     driver_operators = []
@@ -137,8 +147,8 @@ def ising(h, J, num_steps=0, verbose=True, rand_seed=None, connection=None, samp
     betas, gammas = qaoa_inst.get_angles()
     most_freq_string, sampling_results = qaoa_inst.get_string(betas, gammas)
 
-    if embedding is not None:
-        # in case we use an embedding we need to reorder the solution
+    if inv_embedding is not None:
+        # in case we use a custom embedding we need to reorder the solution
         most_freq_string = unembed_solution(most_freq_string, inv_embedding)
 
     most_freq_string_ising = [ising_trans(it) for it in most_freq_string]
