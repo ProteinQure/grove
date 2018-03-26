@@ -11,6 +11,13 @@ def test_energy_value():
 
     assert(np.isclose(ener_ising, -9.9))
 
+    J = {(0, 1, 2): 1.2, (0, 1, 2, 3): 2.5 , (0, 2, 3): 0.5, (1, 3): 3.1}
+    h = {0: -2.4, 1: 5.2 , 3: -0.3}
+    sol = [1, -1, -1, 1]
+    ener_ising = energy_value(h, J, sol)
+
+    assert(np.isclose(ener_ising, -7.8))
+
 def test_ising_trans():
     sol = [0, 1, 1, 0]
     ising_sol = [ising_trans(bit) for bit in sol]
