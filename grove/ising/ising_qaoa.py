@@ -15,7 +15,7 @@ def energy_value(h, J, sol):
     """
     Obtain energy of an Ising solution for a given Ising problem (h,J).
 
-    :param h: External magnetic term of the Ising problem. List.
+    :param h: External magnetic term of the Ising problem. Dictionary.
     :param J: Interaction terms of the Ising problem (may be k-local). Dictionary.
     :param sol: Ising solution. List.
     :return: Energy of the Ising string.
@@ -31,7 +31,7 @@ def energy_value(h, J, sol):
             multipliers = int(sol[elm[0]]) * int(sol[elm[1]])
             # if locality > 2 then add more multipliers
             for i in range(2, len(elm)):
-                multipliers = multipliers * sol[elm[i]]
+                multipliers *= sol[elm[i]]
             ener_ising += J[elm] * multipliers
     for i in h.keys():
         ener_ising += h[i] * int(sol[i])
@@ -56,7 +56,7 @@ def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True
     """
     Ising set up method for QAOA. Supports 2-local as well as k-local interaction terms.
 
-    :param h: External magnectic term of the Ising problem. List.
+    :param h: External magnectic term of the Ising problem. Dictionary.
     :param J: Interaction terms of the Ising problem (may be k-local!). Dictionary.
     :param num_steps: (Optional.Default=2 * len(h)) Trotterization order for the
                   QAOA algorithm.

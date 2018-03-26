@@ -6,7 +6,7 @@ from mock import patch
 
 def test_energy_value():
     J = {(0, 1): 2.3}
-    h = [-2.4, 5.2]
+    h = {0: -2.4,1: 5.2}
     sol = [1, -1]
     ener_ising = energy_value(h, J, sol)
 
