@@ -102,7 +102,6 @@ def ising(h, J, num_steps=0, driver_operators=None, verbose=True,
                         + list(h.keys()))
 
     cost_operators = []
-    driver_operators = []
     for key in J.keys():
         # first PauliTerm is multiplied with coefficient obtained from J
         pauli_product = PauliTerm("Z", key[0], J[key])
@@ -118,6 +117,7 @@ def ising(h, J, num_steps=0, driver_operators=None, verbose=True,
         cost_operators.append(PauliSum([PauliTerm("Z", i, h[i])]))
 
     if driver_operators is None:
+        driver_operators = []
         # default to X mixer
         for i in qubit_indices:
             driver_operators.append(PauliSum([PauliTerm("X", i, -1.0)]))
