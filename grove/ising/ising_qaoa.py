@@ -15,9 +15,9 @@ def energy_value(h, J, sol):
     """
     Obtain energy of an Ising solution for a given Ising problem (h,J).
 
-    :param h: External magnetic term of the Ising problem. Dictionary.
-    :param J: Interaction terms of the Ising problem (may be k-local). Dictionary.
-    :param sol: Ising solution. List.
+    :param h: (dict) External magnetic term of the Ising problem.
+    :param J: (dict) Interaction terms of the Ising problem (may be k-local).
+    :param sol: (list) Ising solution.
     :return: Energy of the Ising string.
     :rtype: Integer or float.
 
@@ -50,18 +50,16 @@ def ising_trans(x):
         return 1
 
 
-def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True,
+def ising(h, J, num_steps=0, driver_operators=None, verbose=True,
           rand_seed=None, connection=None, samples=None, initial_beta=None,
           initial_gamma=None, minimizer_kwargs=None, vqe_option=None):
     """
     Ising set up method for QAOA. Supports 2-local as well as k-local interaction terms.
 
-    :param h: External magnectic term of the Ising problem. Dictionary.
-    :param J: Interaction terms of the Ising problem (may be k-local!). Dictionary.
+    :param h: (dict) External magnectic term of the Ising problem.
+    :param J: (dict) Interaction terms of the Ising problem (may be k-local).
     :param num_steps: (Optional.Default=2 * len(h)) Trotterization order for the
                   QAOA algorithm.
-    :param embedding: (Optional. Default: None) Mapping of logical to physical qubits
-           in the QPU hardware graph. Logical qubits must be the dict keys. Dictionary.
     :param driver_operators: (Optional. Default: X on all qubits.) The mixer
                 Hamiltonian used in QAOA. Can be used to enforce hard constraints
                 and ensure that solution stays in feasible subspace.
@@ -79,14 +77,12 @@ def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True
                           parameters.
     :param minimizer_kwargs: (Optional. Default=None). Minimizer optional
                              arguments.  If None set to
-                             {'method': 'Nelder-Mead',
-                             'options': {'ftol': 1.0e-2, 'xtol': 1.0e-2,
-                                        'disp': False}
-    :param vqe_option: (Optional. Default=None). VQE optional
-                             arguments.  If None set to
+                             {'method': 'Nelder-Mead', 'options': {'ftol': 1.0e-2,
+                             'xtol': 1.0e-2, disp': False}
+    :param vqe_option: (Optional. Default=None). VQE optional arguments. If None set to
                        vqe_option = {'disp': print_fun, 'return_all': True,
                        'samples': samples}
-    :return: Most frequent Ising string, Energy of the Ising string, Circuit used to obtain result.
+    :return: Most frequent Ising string, energy of the Ising string, circuit used to obtain result.
     :rtype: List, Integer or float, 'pyquil.quil.Program'.
 
     """
@@ -96,30 +92,28 @@ def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True
     n_nodes = len(set([ index for tuple_ in list(J.keys()) for index in tuple_]
                         + list(h.keys())))
 
-    if embedding is not None:
-        # construct inverse embedding
-        inv_embedding = { embedding[k]:k for k in embedding.keys() }
+    qubit_indices = set([ index for tuple_ in list(J.keys()) for index in tuple_]
+                        + list(h.keys()))
 
     cost_operators = []
     driver_operators = []
     for key in J.keys():
-        print(key)
         # first PauliTerm is multiplied with coefficient obtained from J
-        pauli_product = PauliTerm("Z", embedding[key[0]], J[key])
+        pauli_product = PauliTerm("Z", key[0], J[key])
 
         for i in range(1,len(key)):
             # multiply with additional Z PauliTerms depending
             # on the locality of the interaction terms
-            pauli_product *= PauliTerm("Z", embedding[key[i]])
+            pauli_product *= PauliTerm("Z", key[i])
 
         cost_operators.append(PauliSum([pauli_product]))
 
     for i in h.keys():
-        cost_operators.append(PauliSum([PauliTerm("Z", embedding[i], h[i])]))
+        cost_operators.append(PauliSum([PauliTerm("Z", i, h[i])]))
 
     if driver_operators is None:
         # default to X mixer
-        for i in embedding.values():
+        for i in qubit_indices:
             driver_operators.append(PauliSum([PauliTerm("X", i, -1.0)]))
 
     if connection is None:
@@ -142,7 +136,6 @@ def ising(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True
                      rand_seed=rand_seed,
                      init_betas=initial_beta,
                      init_gammas=initial_gamma,
-                     embedding=embedding,
                      minimizer=minimize,
                      minimizer_kwargs=minimizer_kwargs,
                      vqe_options=vqe_option)

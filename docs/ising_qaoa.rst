@@ -152,7 +152,7 @@ value, either +1 or -1, in order to get an overall energy of -1. Hence, a negati
 If the coupling is \\( J_{i,j} = +1 \\) the energy is minimized when the two spins have opposite values.
 Thus, a positive coupling *anti-correlates* spins!
 
-Now consider the following two-dimensional graph with spins \\( \\sigma_{0}, \\sigma_{1}, \\sigma_{2}, \\sigma_{3},\\):
+Now consider the following two-dimensional graph with spins \\( \\sigma_{0}, \\sigma_{1}, \\sigma_{2}, \\sigma_{3}\\):
 
 .. image:: ising_qaoa/2d_checkerboard.png
    :align: center
