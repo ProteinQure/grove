@@ -101,8 +101,6 @@ def test_ising_mock():
     for i in range(4):
         for j in range(4):
             if j != i:
-                print('i: ', i)
-                print('j: ', j)
                 swap_mixer.append(PauliSum([PauliTerm("X", i, 0.5) * PauliTerm("X", j, 1.0)]))
                 swap_mixer.append(PauliSum([PauliTerm("Y", i, 0.5) * PauliTerm("Y", j, 1.0)]))
 
