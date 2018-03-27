@@ -1,5 +1,5 @@
 Ising wrapper for the Quantum Approximate Optimization Algorithm (QAOA)
-=================================================
+=======================================================================
 
 Overview
 --------
@@ -136,7 +136,7 @@ Ising QAOA wrapper to approximate ground states of various Hamiltonians.
 .. _2d-checkerboard:
 
 2-local Checkerboard Example
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before we try to create a checkerboard pattern, let's quickly think about the interaction or coupling term.
 Consider two spins \\( \\sigma_{i} \\) and \\( \\sigma_{j} \\) and their 2-local interaction term \\( J_{i,j} \\):
@@ -253,16 +253,16 @@ Source Code Docs
 Here you can find documentation for the different functions of Ising QAOA.
 
 grove.ising.ising_qaoa.ising
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: grove.ising.ising_qaoa.ising
 
 grove.ising.ising_qaoa.ising_trans
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: grove.ising.ising_qaoa.ising_trans
 
 grove.ising.ising_qaoa.energy_value
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: grove.ising.ising_qaoa.energy_value
