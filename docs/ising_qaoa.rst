@@ -199,6 +199,53 @@ We run it ten times in order to collect some statistics:
 You should get the two possible solution strings \\( [-1, 1, 1, -1] \\) and \\( [1, -1, -1, 1] \\)
 with roughly equal probabilities and an energy value of \\( -4.0 \\) each.
 
+3-local Triangle Example
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+To illustrate the use of Ising QAOA with k-local interaction terms we will now consider a triangular graph.
+This time we are dealing with 3 spins \\( \\sigma_{0}, \\sigma_{1}, \\sigma_{2}\\):
+
+.. image:: ising_qaoa/triangle.png
+   :align: center
+   :scale: 75%
+
+where the orange plane represents the 3-local interactions \\( J_{0,1,2} \\). The goal is to colour the graph
+such that it looks like this:
+
+.. image:: ising_qaoa/triangle_desired.png
+   :align: center
+   :scale: 75%
+Let's again define that we colour vertex \\( i \\) black if \\( \\sigma_{i} = -1 \\) and white if \\( \\sigma_{i} = +1 \\).
+To get the desired colouring we define a strongly negative 3-local interaction term \\( J_{0,1,2} \\). This ensures that
+either all vertices are coloured white or two vertices are coloured black. In order to incentivize the latter,
+we set the following biases on \\( \\sigma_{0} \\) and \\( \\sigma_{1}\\):
+
+.. code-block:: python
+
+    import pyquil.api as api
+    from grove.ising.ising_qaoa import ising as ising_qaoa
+
+    qvm_connection = api.QVMConnection()
+
+    J = {(0,1,2): -3}
+    h = {0: 1, 1: -1}
+
+We can now run the algorithm ten times with step size 2 to collect statistics (this might take a couple of minutes):
+
+.. code-block:: python
+
+    steps = 2
+    runs = 10
+    stats = dict()
+    for _ in range(runs):
+        solution_string, ising_energy, _  = ising_qaoa(h=h, J=J, num_steps=steps)
+        if tuple(solution_string) in stats.keys():
+            stats[tuple(solution_string)] += 1
+        else:
+            stats[tuple(solution_string)] = 1
+    print(f'Solution statistics: {stats}')
+
+The majority of the results should be the correct solution string \\( [-1, 1, -1 ] \\) (with energy -5.0).
 
 Source Code Docs
 ----------------
