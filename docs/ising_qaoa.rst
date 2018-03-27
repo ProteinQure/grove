@@ -135,7 +135,7 @@ Ising QAOA wrapper to approximate ground states of various Hamiltonians.
 
 .. _2d-checkerboard:
 
-2D Checkerboard Example
+2-local Checkerboard Example
 ~~~~~~~~~~~~~~~
 
 Before we try to create a checkerboard pattern, let's quickly think about the interaction or coupling term.
