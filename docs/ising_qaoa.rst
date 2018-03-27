@@ -42,7 +42,7 @@ for the checkerboard problem:
 .. code-block:: python
 
     J = {(0, 1): 1, (0, 2): 1, (1, 3): 1, (2, 3): 1}
-    h = {}
+    h = {0: -1, 1: 1, 2: 1, 3: -1}
 
 There are plenty of optional configuration parameters for the algorithm but the two
 most important are the number of steps to use for the trotterization (roughly corresponds to the accuracy of the optimization) and the driver Hamiltonian (which determines how the
@@ -55,8 +55,8 @@ We instantiate the algorithm and run the optimization routine on our QVM:
     solution_string, ising_energy, _  = ising_qaoa(h=h, J=J, num_steps=steps)
     print(f'The algorithm returned {solution_string} with an energy of {ising_energy}')
 
-When running this routine you should observe the expectation value converging towards -4.0
-and the final solution should be either \\( [-1, 1, 1, -1] \\) or \\( [1, -1, -1, 1] \\) with equal probabilities and both with an energy of \\( -4.0 \\).
+When running this routine you should observe the expectation value converging towards -7.0
+and the solution with the highest probability should be \\( [1, -1, -1, 1] \\) with an energy of \\( -8.0 \\).
 
 We can verify this by running the Ising QAOA multiple times and collecting statistics.
 To do this, replace the last line of the last code block with:
@@ -73,7 +73,7 @@ To do this, replace the last line of the last code block with:
             stats[tuple(solution_string)] = 1
     print(f'Solution statistics: {stats}')
 
-You should then see that the algorithm returns the two solutions with ~50% probability each.
+You should see that the algorithm returns the aforementioned solution with ~99.99% probability (unless the classical minimizer got stuck in a local minima).
 
 
 Algorithm and Details
@@ -137,7 +137,33 @@ Ising QAOA wrapper to approximate ground states of various Hamiltonians.
 2D Checkerboard
 ~~~~~~~~~~~~~~~
 
+Before we try to create a checkerboard pattern, let's quickly think about the interaction or coupling term.
+Consider two spins \\( \\sigma_{i} \\) and \\( \\sigma_{j} \\) and their 2-local interaction term \\( J_{i,j} \\):
 
+.. image:: ising_qaoa/simple_coupling.png
+   :align: center
+   :scale: 75%
+
+Suppose there are no biases on spins \\( i \\) and \\( j \\) and the coupling is \\( J_{i,j} = -1 \\).
+What values of \\( \\sigma_{i} \\) and \\( \\sigma_{j} \\) minimize the energy? Both spins should have the same
+value, either +1 or -1, in order to get an overall energy of -1. Hence, a negative coupling term *correlates* spins!
+
+If the coupling is \\( J_{i,j} = +1 \\) then the energy is minimized when the two spins have opposite values.
+Thus, a positive coupling *anti-correlates* spins!
+
+Now consider the following two-dimensional graph with spins \\( \\sigma_{0}, \\sigma_{1}, \\sigma_{2}, \\sigma_{3},\\):
+
+.. image:: ising_qaoa/2d_checkerboard.png
+   :align: center
+   :scale: 75%
+
+Let's define that we colour vertex \\( i \\) black if \\( \\sigma_{i} = -1 \\) and white if \\( \\sigma_{i} = +1 \\).
+The goal is to create a checkerboard pattern with the four vertices in the graph. There is various ways of achieving this
+and 
+
+.. image:: ising_qaoa/2d_checkerboard_solutions.png
+   :align: center
+   :scale: 75%
 
 Source Code Docs
 ----------------
