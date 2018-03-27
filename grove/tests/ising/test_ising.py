@@ -33,7 +33,7 @@ def test_ising_mock():
     J = {(0, 1): -2, (2, 3): 3}
     h = {0: 1, 1: 1, 2: -1, 3: 1}
     p = 1
-    most_freq_string_ising, energy_ising, circuit = ising(h, J, num_steps=p, vqe_option=None, connection=cxn)
+    most_freq_string_ising, energy_ising, circuit = ising_qaoa(h, J, num_steps=p, vqe_option=None, connection=cxn)
 
     assert most_freq_string_ising == [-1, -1, 1, -1]
     assert energy_ising == -9
@@ -47,7 +47,7 @@ def test_ising_mock():
     J = {(0, 1): 1, (0, 2): 1, (1, 3): 1, (2, 3): 1}
     h = {}
     p = 1
-    most_freq_string_ising, energy_ising, circuit = ising(h, J, num_steps=p, vqe_option=None, connection=cxn)
+    most_freq_string_ising, energy_ising, circuit = ising_qaoa(h, J, num_steps=p, vqe_option=None, connection=cxn)
 
     assert most_freq_string_ising == [-1, 1, -1, 1]
     assert energy_ising == 0
@@ -61,7 +61,7 @@ def test_ising_mock():
     J = {}
     h = {0: 1, 1: -1, 2: 1, 3: -1}
     p = 1
-    most_freq_string_ising, energy_ising, circuit = ising(h, J, num_steps=p, vqe_option=None, connection=cxn)
+    most_freq_string_ising, energy_ising, circuit = ising_qaoa(h, J, num_steps=p, vqe_option=None, connection=cxn)
 
     assert most_freq_string_ising == [-1, 1, -1, 1]
     assert energy_ising == -4
@@ -74,7 +74,7 @@ def test_ising_mock():
     J = {(0, 4): -1}
     h = {0: 1, 1: -1, 2: 1, 3: -1}
     p = 1
-    most_freq_string_ising, energy_ising, circuit = ising(h, J, num_steps=p, vqe_option=None, connection=cxn)
+    most_freq_string_ising, energy_ising, circuit = ising_qaoa(h, J, num_steps=p, vqe_option=None, connection=cxn)
 
     assert most_freq_string_ising == [-1, 1, -1, 1, -1]
     assert energy_ising == -5
@@ -87,7 +87,7 @@ def test_ising_mock():
     J = {(0, 1, 2): 1.2, (0, 1, 2, 3): 2.5 , (0, 2, 3): 0.5, (1, 3): 3.1}
     h = {0: -2.4, 1: 5.2 , 3: -0.3}
     p = 1
-    most_freq_string_ising, energy_ising, circuit = ising(h, J, num_steps=p, vqe_option=None, connection=cxn)
+    most_freq_string_ising, energy_ising, circuit = ising_qaoa(h, J, num_steps=p, vqe_option=None, connection=cxn)
 
     assert most_freq_string_ising == [1, -1, -1, 1]
     assert energy_ising == -7.8
@@ -107,7 +107,7 @@ def test_ising_mock():
     J = {(0, 1, 2): 1.2, (0, 1, 2, 3): 2.5 , (0, 2, 3): 0.5, (1, 3): 3.1}
     h = {0: -2.4, 1: 5.2 , 3: -0.3}
     p = 1
-    most_freq_string_ising, energy_ising, circuit = ising(h, J, driver_operators=swap_mixer, num_steps=p, vqe_option=None, connection=cxn)
+    most_freq_string_ising, energy_ising, circuit = ising_qaoa(h, J, driver_operators=swap_mixer, num_steps=p, vqe_option=None, connection=cxn)
 
     assert most_freq_string_ising == [1, -1, -1, 1]
     assert energy_ising == -7.8

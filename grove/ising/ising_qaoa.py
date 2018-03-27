@@ -56,7 +56,7 @@ def ising_trans(x):
         return 1
 
 
-def ising(h, J, num_steps=0, driver_operators=None, verbose=True,
+def ising_qaoa(h, J, num_steps=0, driver_operators=None, verbose=True,
           rand_seed=None, connection=None, samples=None, initial_beta=None,
           initial_gamma=None, minimizer_kwargs=None, vqe_option=None):
     """
