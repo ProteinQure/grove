@@ -78,6 +78,7 @@ class QAOA(object):
         self.betas = init_betas
         self.gammas = init_gammas
         self.vqe_options = vqe_options
+
         if embedding is not None:
             self.embedding = embedding
         else:

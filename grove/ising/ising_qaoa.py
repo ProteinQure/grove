@@ -61,7 +61,7 @@ def ising_trans(x):
         return 1
 
 
-def ising(h, J, num_steps=0, verbose=True, rand_seed=None, connection=None, samples=None,
+def ising(h, J, num_steps=0, embedding=None, verbose=True, rand_seed=None, connection=None, samples=None,
           initial_beta=None, initial_gamma=None, minimizer_kwargs=None,
           vqe_option=None):
     """
