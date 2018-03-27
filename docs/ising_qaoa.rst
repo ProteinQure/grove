@@ -45,9 +45,9 @@ for the checkerboard problem:
     h = {0: -1, 1: 1, 2: 1, 3: -1}
 
 There are plenty of optional configuration parameters for the algorithm but the two
-most important are the number of steps to use for the trotterization (roughly corresponds to the accuracy of the optimization) and the driver Hamiltonian (which determines how the
-state space is searched).
-We instantiate the algorithm and run the optimization routine on our QVM:
+most important are the number of steps to use for the trotterization (roughly corresponds to
+the accuracy of the optimization) and the driver Hamiltonian (which determines how the
+state space is searched). We instantiate the algorithm and run the optimization routine on our QVM:
 
 .. code-block:: python
 
@@ -55,7 +55,7 @@ We instantiate the algorithm and run the optimization routine on our QVM:
     solution_string, ising_energy, _  = ising_qaoa(h=h, J=J, num_steps=steps)
     print(f'The algorithm returned {solution_string} with an energy of {ising_energy}')
 
-When running this routine you should observe the expectation value converging towards -7.0
+When running this routine you should observe the expectation value converging towards -8.0
 and the solution with the highest probability should be \\( [1, -1, -1, 1] \\) with an energy of \\( -8.0 \\).
 
 We can verify this by running the Ising QAOA multiple times and collecting statistics.
@@ -73,7 +73,7 @@ To do this, replace the last line of the last code block with:
             stats[tuple(solution_string)] = 1
     print(f'Solution statistics: {stats}')
 
-You should see that the algorithm returns the aforementioned solution with ~99.99% probability (unless the classical minimizer got stuck in a local minima).
+You should see that the algorithm returns the aforementioned solution with ~99% probability (unless the classical minimizer got stuck in a local minima).
 
 
 Algorithm and Details
@@ -145,10 +145,10 @@ Consider two spins \\( \\sigma_{i} \\) and \\( \\sigma_{j} \\) and their 2-local
    :scale: 75%
 
 Suppose there are no biases on spins \\( i \\) and \\( j \\) and the coupling is \\( J_{i,j} = -1 \\).
-What values of \\( \\sigma_{i} \\) and \\( \\sigma_{j} \\) minimize the energy? Both spins should have the same
+Which values of \\( \\sigma_{i} \\) and \\( \\sigma_{j} \\) minimize the energy? Both spins should have the same
 value, either +1 or -1, in order to get an overall energy of -1. Hence, a negative coupling term *correlates* spins!
 
-If the coupling is \\( J_{i,j} = +1 \\) then the energy is minimized when the two spins have opposite values.
+If the coupling is \\( J_{i,j} = +1 \\) the energy is minimized when the two spins have opposite values.
 Thus, a positive coupling *anti-correlates* spins!
 
 Now consider the following two-dimensional graph with spins \\( \\sigma_{0}, \\sigma_{1}, \\sigma_{2}, \\sigma_{3},\\):
@@ -158,12 +158,46 @@ Now consider the following two-dimensional graph with spins \\( \\sigma_{0}, \\s
    :scale: 75%
 
 Let's define that we colour vertex \\( i \\) black if \\( \\sigma_{i} = -1 \\) and white if \\( \\sigma_{i} = +1 \\).
-The goal is to create a checkerboard pattern with the four vertices in the graph. There is various ways of achieving this
-and 
+The goal is to create a checkerboard pattern with the four vertices in the graph. There is various ways of defining
+\\( h \\) and \\( J \\) to achieve this result. There are two possible solutions to this problem:
 
 .. image:: ising_qaoa/2d_checkerboard_solutions.png
    :align: center
    :scale: 75%
+
+The example used in the :ref:`quickstart-example` is one way of doing it. However, it involved bias terms which
+strongly biased for solution nr. 2. This time we want don't care which solution we get as long as it is a valid
+solution. Hence, we don't use any bias terms and only anticorrelate each pair of neighbouring spins:
+
+.. code-block:: python
+
+    import pyquil.api as api
+    from grove.ising.ising_qaoa import ising as ising_qaoa
+    qvm_connection = api.QVMConnection()
+
+    J = {(0, 1): 1, (0, 2): 1, (1, 3): 1, (2, 3): 1}
+    h = {}
+
+
+Given this Ising problem, we run the QAOA algorithm with two \\( \\beta \\) and two \\( \\gamma \\) parameters (``steps=2``).
+We run it ten times in order to collect some statistics:
+
+.. code-block:: python
+
+    steps = 2
+    runs = 10
+    stats = dict()
+    for _ in range(runs):
+        solution_string, ising_energy, _  = ising_qaoa(h=h, J=J, num_steps=steps)
+        if tuple(solution_string) in stats.keys():
+            stats[tuple(solution_string)] += 1
+        else:
+            stats[tuple(solution_string)] = 1
+    print(f'Solution statistics: {stats}')
+
+You should get the two possible solution strings \\( [-1, 1, 1, -1] \\) and \\( [1, -1, -1, 1] \\)
+with roughly equal probabilities and an energy value of \\( -4.0 \\) each.
+
 
 Source Code Docs
 ----------------
