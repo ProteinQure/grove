@@ -43,7 +43,13 @@ def print_fun(x):
 
 
 def ising_trans(x):
-    # Transformation to Ising notation
+    """
+    Transformation to Ising notation.
+
+    :param x: (int) Value of a single binary bit from {0, 1}.
+    :return: Transformed bit value from {-1, 1}.
+    :rtype: Integer.
+    """
     if x == 1:
         return -1
     else:
