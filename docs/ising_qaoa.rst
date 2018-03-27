@@ -1,5 +1,5 @@
-Ising wrapper for the Quantum Approximate Optimization Algorithm (QAOA)
-=======================================================================
+Ising Wrapper for QAOA
+======================
 
 Overview
 --------
