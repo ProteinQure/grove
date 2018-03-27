@@ -21,6 +21,7 @@ the specified Ising-type Hamiltonian through the use of QAOA which itself
 finds the optimal rotation angles via Grove's
 `variational-quantum-eigensolver method <http://grove-docs.readthedocs.io/en/latest/vqe.html>`_.
 
+.. _quickstart-example:
 
 Quickstart Example
 -------------------
@@ -134,7 +135,7 @@ Ising QAOA wrapper to approximate ground states of various Hamiltonians.
 
 .. _2d-checkerboard:
 
-2D Checkerboard
+2D Checkerboard Example
 ~~~~~~~~~~~~~~~
 
 Before we try to create a checkerboard pattern, let's quickly think about the interaction or coupling term.
