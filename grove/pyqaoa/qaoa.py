@@ -26,11 +26,11 @@ from functools import reduce
 
 class QAOA(object):
     def __init__(self, qvm, qubits, steps=1, init_betas=None,
-                 init_gammas=None, cost_ham=None,
-                 ref_ham=None, driver_ref=None,
-                 minimizer=None, minimizer_args=None,
-                 minimizer_kwargs=None, rand_seed=None,
-                 vqe_options=None, store_basis=False):
+                 init_gammas=None, embedding=None, cost_ham=[],
+                 ref_hamiltonian=[], driver_ref=None,
+                 minimizer=None, minimizer_args=[],
+                 minimizer_kwargs={}, rand_seed=None,
+                 vqe_options={}, store_basis=False):
         """
         QAOA object.
 
@@ -45,6 +45,8 @@ class QAOA(object):
                            mixing terms. Default=None.
         :param init_gammas: (list) Initial values for the gamma parameters on the
                             cost function. Default=None.
+        :param embedding: (dict) Dictionary mapping logical qubits to physical
+                    qubits on the Rigetti QPU. Logical qubits must be the dict keys.
         :param cost_ham: list of clauses in the cost function. Must be
                     PauliSum objects
         :param ref_ham: list of clauses in the mixer function. Must be
@@ -76,6 +78,12 @@ class QAOA(object):
         self.steps = steps
         self.qubits = qubits
         self.nstates = 2 ** len(qubits)
+
+        if embedding is not None:
+            self.embedding = embedding
+        else:
+            # create identity dictionary
+            self.embedding = {i: i for i in qubits}
 
         self.cost_ham = cost_ham or []
         self.ref_ham = ref_ham or []
@@ -235,9 +243,12 @@ class QAOA(object):
         param_prog = self.get_parameterized_program()
         stacked_params = np.hstack((betas, gammas))
         sampling_prog = param_prog(stacked_params)
+        for i in self.embedding.values():
+            sampling_prog.measure(i, [i])
 
+        classical_register = list(sorted(self.embedding.values()))
         bitstring_samples = self.qvm.run_and_measure(sampling_prog,
-                                                     self.qubits,
+                                                     classical_register,
                                                      trials=samples)
         bitstring_tuples = list(map(tuple, bitstring_samples))
         freq = Counter(bitstring_tuples)
