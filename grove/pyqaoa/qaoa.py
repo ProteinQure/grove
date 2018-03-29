@@ -77,7 +77,10 @@ class QAOA(object):
         self.qvm = qvm
         self.steps = steps
         self.qubits = qubits
-        self.nstates = 2 ** len(qubits)
+
+        self.betas = init_betas
+        self.gammas = init_gammas
+        self.vqe_options = vqe_options
 
         if embedding is not None:
             self.embedding = embedding
