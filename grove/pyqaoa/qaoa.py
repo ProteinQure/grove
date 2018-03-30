@@ -84,9 +84,11 @@ class QAOA(object):
 
         if embedding is not None:
             self.embedding = embedding
+            self.inv_embedding = {embedding[k]:k for k in embedding.keys()}
         else:
             # create identity dictionary
             self.embedding = {i: i for i in qubits}
+            self.inv_embedding = None
 
         self.cost_ham = cost_ham or []
         self.ref_ham = ref_ham or []
@@ -255,5 +257,22 @@ class QAOA(object):
                                                      trials=samples)
         bitstring_tuples = list(map(tuple, bitstring_samples))
         freq = Counter(bitstring_tuples)
-        most_frequent_bit_string = max(freq, key=lambda x: freq[x])
-        return most_frequent_bit_string, freq
+        most_freq_bit_string = max(freq, key=lambda x: freq[x])
+        if self.inv_embedding is not None:
+            most_freq_bit_string = self.unembed_solution(most_freq_bit_string)
+        return most_freq_bit_string, freq
+
+
+    def unembed_solution(self, embedded_solution):
+        """
+        In case an embedding of logical to physical qubits was used.
+        Unembedding the solution string since QAOA returns solution string
+        that is sorted based on indices of physical qubits which might not
+        match up with qubit ordering in logical space.
+
+        :param embedded_solution: (list) Solution string returned from QAOA.
+        :return: Unembedded (correctly ordered) solution string.
+        :rtype: List.
+        """
+        pos_list = [x[1] for x in sorted(self.inv_embedding.items(),key=lambda x: x[0])]
+        return tuple([embedded_solution[i] for i,_ in sorted(enumerate(pos_list),key=lambda x: x[1])])
