@@ -77,11 +77,6 @@ class QAOA(object):
         self.qvm = qvm
         self.steps = steps
         self.qubits = qubits
-<<<<<<< HEAD
-
-        self.betas = init_betas
-        self.gammas = init_gammas
-        self.vqe_options = vqe_options
 
         if embedding is not None:
             self.embedding = embedding
@@ -90,7 +85,6 @@ class QAOA(object):
             # create identity dictionary
             self.embedding = {i: i for i in qubits}
             self.inv_embedding = None
-
         self.nstates = 2 ** len(qubits)
 
         self.cost_ham = cost_ham or []
@@ -116,33 +110,6 @@ class QAOA(object):
             pq.Program(*[H(i) for i in self.qubits])
         )
 
-=======
-        self.nstates = 2 ** len(qubits)
-
-        self.cost_ham = cost_ham or []
-        self.ref_ham = ref_ham or []
-
-        self.minimizer = minimizer or optimize.minimize
-        self.minimizer_args = minimizer_args or []
-        self.minimizer_kwargs = minimizer_kwargs or {
-            'method': 'Nelder-Mead',
-            'options': {
-                'disp': True,
-                'ftol': 1.0e-2,
-                'xtol': 1.0e-2
-            }
-        }
-
-        self.betas = init_betas or np.random.uniform(0, np.pi, self.steps)[::-1]
-        self.gammas = init_gammas or np.random.uniform(0, 2*np.pi, self.steps)
-        self.vqe_options = vqe_options or {}
-
-        self.ref_state_prep = (
-            driver_ref or
-            pq.Program(*[H(i) for i in self.qubits])
-        )
-
->>>>>>> beautify
         if store_basis:
             self.states = [
                 np.binary_repr(i, width=len(self.qubits))
