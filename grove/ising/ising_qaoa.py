@@ -145,7 +145,7 @@ def ising_qaoa(h, J, num_steps=0, embedding=None, driver_operators=None, verbose
     if not verbose:
         vqe_option['disp'] = None
 
-    qaoa_inst = QAOA(connection, qubits=sorted(embedding.values()), steps=num_steps, cost_ham=cost_operators,
+    qaoa_inst = QAOA(connection, qubits=list(sorted(embedding.values())), steps=num_steps, cost_ham=cost_operators,
                      ref_ham=driver_operators, store_basis=True,
                      rand_seed=rand_seed,
                      embedding=embedding,
