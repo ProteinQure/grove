@@ -266,9 +266,8 @@ class QAOA(object):
         """
         In case an embedding of logical to physical qubits was used.
         Unembedding the solution string since QAOA returns solution string
-        that is sorted based on indices of physical qubits which might not
-        match up with qubit ordering in logical space.
-
+        that is that is reverse sorted based on indices of physical qubits which
+        might not match up with reverse qubit index ordering in logical space.
         :param embedded_solution: (list) Solution string returned from QAOA.
         :return: Unembedded (correctly ordered) solution string.
         :rtype: List.

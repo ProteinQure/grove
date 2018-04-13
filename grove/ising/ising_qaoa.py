@@ -1,11 +1,12 @@
 """
 Finding the minimum energy for an Ising problem by QAOA.
 """
+import numpy as np
+from scipy.optimize import minimize
+
 import pyquil.api as api
 from grove.pyqaoa.qaoa import QAOA
 from pyquil.paulis import PauliSum, PauliTerm
-from scipy.optimize import minimize
-import numpy as np
 
 CXN = api.QVMConnection()
 
