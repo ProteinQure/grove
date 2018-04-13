@@ -227,7 +227,7 @@ class QAOA(object):
             probs[xx] = np.conj(wf[xx]) * wf[xx]
         return probs
 
-    def get_string(self, betas, gammas, samples=100):
+    def get_string(self, betas, gammas, samples=1000):
         """
         Compute the most probable string.
 
@@ -248,10 +248,8 @@ class QAOA(object):
         param_prog = self.get_parameterized_program()
         stacked_params = np.hstack((betas, gammas))
         sampling_prog = param_prog(stacked_params)
-        for i in self.embedding.values():
-            sampling_prog.measure(i, [i])
 
-        classical_register = list(sorted(self.embedding.values()))
+        classical_register = list(sorted(self.embedding.values(), reverse=True))
         bitstring_samples = self.qvm.run_and_measure(sampling_prog,
                                                      classical_register,
                                                      trials=samples)
