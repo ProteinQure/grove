@@ -27,7 +27,7 @@ from functools import reduce
 class QAOA(object):
     def __init__(self, qvm, qubits, steps=1, init_betas=None,
                  init_gammas=None, embedding=None, cost_ham=[],
-                 ref_hamiltonian=[], driver_ref=None,
+                 ref_ham=[], driver_ref=None,
                  minimizer=None, minimizer_args=[],
                  minimizer_kwargs={}, rand_seed=None,
                  vqe_options={}, store_basis=False):
@@ -89,6 +89,8 @@ class QAOA(object):
             # create identity dictionary
             self.embedding = {i: i for i in qubits}
             self.inv_embedding = None
+
+        self.nstates = 2 ** len(qubits)
 
         self.cost_ham = cost_ham or []
         self.ref_ham = ref_ham or []
