@@ -58,7 +58,7 @@ def ising_trans(x):
 
 
 def ising_qaoa(h, J, num_steps=0, embedding=None, driver_operators=None, verbose=True,
-               rand_seed=None, connection=None, samples=None,
+               rand_seed=None, connection=None, samples=None, initial_state=None,
                initial_beta=None, initial_gamma=None, minimizer_kwargs=None,
                vqe_option=None):
     """
@@ -82,6 +82,8 @@ def ising_qaoa(h, J, num_steps=0, embedding=None, driver_operators=None, verbose
     :param samples: (Optional. Default=None) VQE option. Number of samples
                     (circuit preparation and measurement) to use in operator
                     averaging. Required when using QPU backend.
+    :param initial_state: (Optional. Default=Superposition of all bitstrings) A quantum circuit
+                    to initialize the initial state. Must be a pyquil Program.
     :param initial_beta: (Optional. Default=None) Initial guess for beta
                          parameters.
     :param initial_gamma: (Optional. Default=None) Initial guess for gamma
