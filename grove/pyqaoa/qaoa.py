@@ -26,11 +26,11 @@ from functools import reduce
 
 class QAOA(object):
     def __init__(self, qvm, qubits, steps=1, init_betas=None,
-                 init_gammas=None, embedding=None, cost_ham=[],
-                 ref_ham=[], driver_ref=None,
-                 minimizer=None, minimizer_args=[],
-                 minimizer_kwargs={}, rand_seed=None,
-                 vqe_options={}, store_basis=False):
+                 init_gammas=None, embedding=None, cost_ham=None,
+                 ref_ham=None, driver_ref=None,
+                 minimizer=None, minimizer_args=None,
+                 minimizer_kwargs=None, rand_seed=None,
+                 vqe_options=None, store_basis=False):
         """
         QAOA object.
 
@@ -77,6 +77,7 @@ class QAOA(object):
         self.qvm = qvm
         self.steps = steps
         self.qubits = qubits
+<<<<<<< HEAD
 
         self.betas = init_betas
         self.gammas = init_gammas
@@ -115,6 +116,33 @@ class QAOA(object):
             pq.Program(*[H(i) for i in self.qubits])
         )
 
+=======
+        self.nstates = 2 ** len(qubits)
+
+        self.cost_ham = cost_ham or []
+        self.ref_ham = ref_ham or []
+
+        self.minimizer = minimizer or optimize.minimize
+        self.minimizer_args = minimizer_args or []
+        self.minimizer_kwargs = minimizer_kwargs or {
+            'method': 'Nelder-Mead',
+            'options': {
+                'disp': True,
+                'ftol': 1.0e-2,
+                'xtol': 1.0e-2
+            }
+        }
+
+        self.betas = init_betas or np.random.uniform(0, np.pi, self.steps)[::-1]
+        self.gammas = init_gammas or np.random.uniform(0, 2*np.pi, self.steps)
+        self.vqe_options = vqe_options or {}
+
+        self.ref_state_prep = (
+            driver_ref or
+            pq.Program(*[H(i) for i in self.qubits])
+        )
+
+>>>>>>> beautify
         if store_basis:
             self.states = [
                 np.binary_repr(i, width=len(self.qubits))
